@@ -21,10 +21,10 @@ public class VehicleDAO {
             stmt.setString(5, vehicle.getAnimalType());
             stmt.setString(6, vehicle.getStatus());
             stmt.executeUpdate();
-            System.out.println("✅ Vehicle added: " + vehicle.getName());
+            System.out.println("Vehicle added: " + vehicle.getName());
 
         } catch (SQLException e) {
-            System.out.println("❌ Error adding vehicle: " + e.getMessage());
+            System.out.println("Error adding vehicle: " + e.getMessage());
         }
     }
 
@@ -49,7 +49,7 @@ public class VehicleDAO {
                 ));
             }
         } catch (SQLException e) {
-            System.out.println("❌ Error fetching vehicles: " + e.getMessage());
+            System.out.println("Error fetching vehicles: " + e.getMessage());
         }
         return vehicles;
     }
@@ -75,7 +75,7 @@ public class VehicleDAO {
                 ));
             }
         } catch (SQLException e) {
-            System.out.println("❌ Error fetching vehicles: " + e.getMessage());
+            System.out.println("Error fetching vehicles: " + e.getMessage());
         }
         return vehicles;
     }
@@ -89,10 +89,10 @@ public class VehicleDAO {
             stmt.setString(1, status);
             stmt.setInt(2, vehicleId);
             stmt.executeUpdate();
-            System.out.println("✅ Vehicle status updated to: " + status);
+            System.out.println("Vehicle status updated to: " + status);
 
         } catch (SQLException e) {
-            System.out.println("❌ Error updating vehicle: " + e.getMessage());
+            System.out.println("Error updating vehicle: " + e.getMessage());
         }
     }
 
@@ -104,10 +104,10 @@ public class VehicleDAO {
 
             stmt.setInt(1, vehicleId);
             stmt.executeUpdate();
-            System.out.println("✅ Vehicle deleted successfully.");
+            System.out.println("Vehicle deleted successfully.");
 
         } catch (SQLException e) {
-            System.out.println("❌ Error deleting vehicle: " + e.getMessage());
+            System.out.println("Error deleting vehicle: " + e.getMessage());
         }
     }
 }
