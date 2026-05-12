@@ -2,7 +2,6 @@ package com.caravan.datastructures;
 
 import com.caravan.model.Vehicle;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class VehicleBST {
@@ -127,3 +126,94 @@ public class VehicleBST {
         }
         return result;
     }
+    // ─── IN-ORDER TRAVERSAL ─────────────────────────────────────────
+    public List<Vehicle> getAllVehiclesInOrder() {
+        List<Vehicle> result = new ArrayList<>();
+        inOrderRec(root, result);
+        return result;
+    }
+
+    private void inOrderRec(Node node, List<Vehicle> result) {
+        if (node == null) return;
+        inOrderRec(node.left, result);
+        result.add(node.vehicle);
+        inOrderRec(node.right, result);
+    }
+
+    // ─── COUNT TOTAL VEHICLES ───────────────────────────────────────
+    public int countVehicles() {
+        return countRec(root);
+    }
+
+    private int countRec(Node node) {
+        if (node == null) return 0;
+        return 1 + countRec(node.left) + countRec(node.right);
+    }
+
+    // ─── IS EMPTY ───────────────────────────────────────────────────
+    public boolean isEmpty() {
+        return root == null;
+    }
+
+    // ─── CLEAR BST ──────────────────────────────────────────────────
+    public void clear() {
+        root = null;
+        System.out.println("BST cleared.");
+    }
+
+    // ─── MOST AVAILABLE TYPE ────────────────────────────────────────
+    public String mostAvailableType() {
+        List<Vehicle> all = getAllVehiclesInOrder();
+        int car = 0, van = 0, bus = 0, truck = 0;
+        for (Vehicle v : all) {
+            if (!v.getStatus().equals("AVAILABLE")) continue;
+            switch (v.getType().toLowerCase()) {
+                case "car"   -> car++;
+                case "van"   -> van++;
+                case "bus"   -> bus++;
+                case "truck" -> truck++;
+            }
+        }
+        int max = Math.max(Math.max(car, van), Math.max(bus, truck));
+        if (max == 0) return "None available";
+        if (max == car)   return "Car ("   + car   + " available)";
+        if (max == van)   return "Van ("   + van   + " available)";
+        if (max == bus)   return "Bus ("   + bus   + " available)";
+        return                   "Truck (" + truck + " available)";
+    }
+
+    // ─── REBALANCE BST ──────────────────────────────────────────────
+    public void rebalance() {
+        List<Vehicle> sorted = getAllVehiclesInOrder();
+        root = null;
+        buildBalanced(sorted, 0, sorted.size() - 1);
+        System.out.println("BST rebalanced.");
+    }
+
+    private void buildBalanced(List<Vehicle> sorted, int start, int end) {
+        if (start > end) return;
+        int mid = (start + end) / 2;
+        insertDirect(sorted.get(mid));
+        buildBalanced(sorted, start, mid - 1);
+        buildBalanced(sorted, mid + 1, end);
+    }
+
+    private void insertDirect(Vehicle vehicle) {
+        root = insertRec(root, vehicle);
+    }
+
+    public void printTree() {
+        System.out.println("\n========== VEHICLE BST ==========");
+        printRec(root, "", true);
+    }
+
+    private void printRec(Node node, String prefix, boolean isLeft) {
+        if (node == null) return;
+        System.out.println(prefix + (isLeft ? "├── " : "└── ") +
+                node.vehicle.getName() +
+                " [Cap: " + node.vehicle.getPassengerCapacity() +
+                ", Status: " + node.vehicle.getStatus() + "]");
+        printRec(node.left,  prefix + (isLeft ? "│   " : "    "), true);
+        printRec(node.right, prefix + (isLeft ? "│   " : "    "), false);
+    }
+}
