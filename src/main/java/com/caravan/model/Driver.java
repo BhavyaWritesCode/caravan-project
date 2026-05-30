@@ -1,31 +1,43 @@
 package com.caravan.model;
 
 public class Driver {
+
     private int id;
     private String name;
-    private String licenseNumber;
+    private String licNo;
     private String phone;
     private String status;
 
-    public Driver(int id, String name, String licenseNumber, 
-                  String phone, String status) {
+    public Driver(int id, String name, String licNo, String phone, String status) {
         this.id = id;
         this.name = name;
-        this.licenseNumber = licenseNumber;
-        this.phone = phone;
-        this.status = status;
+        this.licNo = licNo;
+        this.phone = (phone != null) ? phone : "N/A";
+        this.status = (status != null) ? status : "available";
     }
 
     public int getId() { return id; }
     public String getName() { return name; }
-    public String getLicenseNumber() { return licenseNumber; }
+
+    public String getLicNo() {
+        return licNo;
+    }
+
     public String getPhone() { return phone; }
     public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+
+    public void setStatus(String s) {
+        if(s == null || s.isEmpty()) return;
+        this.status = s;
+    }
+
+    public boolean isAvailable() {
+        return status.equals("available");
+    }
 
     @Override
     public String toString() {
-        return "Driver{id=" + id + ", name='" + name + "', license='" + 
-               licenseNumber + "', phone='" + phone + "', status='" + status + "'}";
+        return id + " | " + name + " lic=" + licNo
+            + " ph=" + phone + " [" + status + "]";
     }
 }
