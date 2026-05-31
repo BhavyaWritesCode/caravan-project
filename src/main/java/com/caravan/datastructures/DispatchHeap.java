@@ -7,13 +7,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
+
 public class DispatchHeap {
 
-    // Max-Heap — highest priority request always on top
-    // Using PriorityBlockingQueue for thread safety (Phase 2)
     private final PriorityBlockingQueue<TripRequest> heap;
-
-    // How long before a request expires (in hours)
     private static final int EXPIRY_HOURS = 24;
 
     public DispatchHeap() {
@@ -23,123 +20,100 @@ public class DispatchHeap {
         );
     }
 
-    // ─── ADD REQUEST ────────────────────────────────────────────────
-    public void addRequest(TripRequest request) {
-        heap.offer(request);
-        System.out.println(" Request added to queue: ID=" + request.getId() +
-                           " Priority=" + request.getPriority());
+    public void addRequest(TripRequest req) {
+        heap.offer(req);
+        System.out.println("added to queue -> id=" + req.getId() + " priority=" + req.getPriority());
     }
 
-    // ─── POLL HIGHEST PRIORITY ──────────────────────────────────────
     public TripRequest pollNext() {
-        TripRequest request = heap.poll();
-        if (request == null) {
-            System.out.println(" Queue is empty — no requests to dispatch.");
+        TripRequest req = heap.poll();
+        if(req == null) {
+            System.out.println("queue empty, nothing to dispatch");
         } else {
-            System.out.println("Dispatching request ID=" + request.getId() +
-                               " Priority=" + request.getPriority());
+            System.out.println("dispatching id=" + req.getId() + " priority=" + req.getPriority());
         }
-        return request;
+        return req;
     }
 
-    // ─── PEEK TOP REQUEST ───────────────────────────────────────────
     public TripRequest peekNext() {
         return heap.peek();
     }
 
-    // ─── SIZE & IS EMPTY ────────────────────────────────────────────
-    public int size() {
-        return heap.size();
-    }
+    public int size() { return heap.size(); }
+    public boolean isEmpty() { return heap.isEmpty(); }
 
-    public boolean isEmpty() {
-        return heap.isEmpty();
-    }
-
-    // ─── URGENT OVERRIDE ────────────────────────────────────────────
-    // Forces a request to priority 99 so it jumps to top immediately
-    public void markAsUrgent(int requestId) {
-        List<TripRequest> temp = new ArrayList<>(heap);
+    public void markUrgent(int reqId) {
+        List<TripRequest> tmp = new ArrayList<>(heap);
         heap.clear();
-        for (TripRequest r : temp) {
-            if (r.getId() == requestId) {
-                r.setPriority(99); // highest possible priority
-                System.out.println("Request ID=" + requestId + 
-                                   " marked as URGENT — moved to top!");
+        for(TripRequest r : tmp) {
+            if(r.getId() == reqId) {
+                r.setPriority(99);
+                System.out.println("id=" + reqId + " marked urgent");
             }
             heap.offer(r);
         }
     }
 
-    // ─── UPDATE PRIORITY ────────────────────────────────────────────
-    public void updatePriority(int requestId, int newPriority) {
-        List<TripRequest> temp = new ArrayList<>(heap);
+    public void updatePriority(int reqId, int newP) {
+        List<TripRequest> tmp = new ArrayList<>(heap);
         heap.clear();
         boolean found = false;
-        for (TripRequest r : temp) {
-            if (r.getId() == requestId) {
-                r.setPriority(newPriority);
+        for(TripRequest r : tmp) {
+            if(r.getId() == reqId) {
+                r.setPriority(newP);
                 found = true;
-                System.out.println("Priority updated for Request ID=" + 
-                                   requestId + " → " + newPriority);
+                System.out.println("priority updated id=" + reqId + " -> " + newP);
             }
             heap.offer(r);
         }
-        if (!found) {
-            System.out.println("Request ID=" + requestId + " not found in queue.");
-        }
+        if(!found)
+            System.out.println("id=" + reqId + " not found in queue");
     }
-    // ─── REMOVE EXPIRED REQUESTS ────────────────────────────────────
-    public void removeExpiredRequests() {
-        List<TripRequest> temp = new ArrayList<>(heap);
+
+    public void removeExpired() {
+        List<TripRequest> tmp = new ArrayList<>(heap);
         heap.clear();
-        int removed = 0;
-        for (TripRequest r : temp) {
-            if (r.getCreatedAt().plusHours(EXPIRY_HOURS).isAfter(LocalDateTime.now())) {
+        int count = 0;
+        for(TripRequest r : tmp) {
+            if(r.getCreatedAt().plusHours(EXPIRY_HOURS).isAfter(LocalDateTime.now())) {
                 heap.offer(r);
             } else {
-                removed++;
-                System.out.println(" Expired request removed: ID=" + r.getId());
+                count++;
+                System.out.println("expired, removed id=" + r.getId());
             }
         }
-        System.out.println(" Expired requests removed: " + removed);
+        System.out.println("total expired removed=" + count);
     }
 
-    // ─── BULK LOAD FROM DATABASE ────────────────────────────────────
-    public void loadFromDatabase() {
+    public void loadFromDB() {
         TripRequestDAO dao = new TripRequestDAO();
         List<TripRequest> pending = dao.getPendingRequests();
-        for (TripRequest r : pending) {
+        for(TripRequest r : pending)
             heap.offer(r);
-        }
-        System.out.println("Loaded " + pending.size() + 
-                           " pending requests from database into heap.");
+        System.out.println("loaded " + pending.size() + " requests from db");
     }
 
-    // ─── PRINT ALL REQUESTS IN QUEUE ────────────────────────────────
     public void printQueue() {
-        if (heap.isEmpty()) {
-            System.out.println("Dispatch queue is empty.");
+        if(heap.isEmpty()) {
+            System.out.println("queue is empty");
             return;
         }
-
-        // Drain to sorted list for display
         List<TripRequest> sorted = new ArrayList<>(heap);
         sorted.sort(Comparator.comparingInt(TripRequest::getPriority).reversed());
 
-        System.out.println("\n========== DISPATCH QUEUE ==========");
-        System.out.printf("%-5s %-20s %-20s %-10s %-10s%n",
-                "ID", "Pickup", "Drop", "Passengers", "Priority");
-        System.out.println("-".repeat(70));
+        System.out.println("\n===== DISPATCH QUEUE =====");
+        System.out.printf("%-5s %-20s %-20s %-8s %-8s%n",
+            "ID", "Pickup", "Drop", "Pax", "Priority");
+        System.out.println("-".repeat(65));
 
-        for (TripRequest r : sorted) {
-            System.out.printf("%-5d %-20s %-20s %-10d %-10d%n",
-                    r.getId(),
-                    r.getPickupLocation(),
-                    r.getDropLocation(),
-                    r.getPassengerCount(),
-                    r.getPriority());
+        for(TripRequest r : sorted) {
+            System.out.printf("%-5d %-20s %-20s %-8d %-8d%n",
+                r.getId(),
+                r.getPickup(),
+                r.getDrop(),
+                r.getPaxCount(),
+                r.getPriority());
         }
-        System.out.println("=".repeat(70) + "\n");
+        System.out.println("=".repeat(65));
     }
 }

@@ -1,11 +1,7 @@
 package com.caravan.database;
-
 import java.sql.*;
-
-
 public class DispatchDAO {
 
-    // Save a new dispatch record
     public void addDispatch(int requestId, int vehicleId, int driverId,
                             double distanceKm, double estimatedCost) {
         String sql = "INSERT INTO dispatches (request_id, vehicle_id, driver_id, " +
@@ -28,7 +24,6 @@ public class DispatchDAO {
         }
     }
 
-    // Complete a dispatch
     public void completeDispatch(int requestId) {
         String sql = "UPDATE dispatches SET status = 'COMPLETED' " +
                      "WHERE request_id = ?";
@@ -45,7 +40,6 @@ public class DispatchDAO {
         }
     }
 
-    // Get all dispatches
     public void printAllDispatches() {
         String sql = "SELECT d.id, t.pickup_location, t.drop_location, " +
                      "v.name AS vehicle, dr.name AS driver, " +

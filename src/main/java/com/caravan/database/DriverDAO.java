@@ -7,100 +7,94 @@ import java.util.List;
 
 public class DriverDAO {
 
-    public void addDriver(Driver driver) {
+    public void addDriver(Driver d) {
         String sql = "INSERT INTO drivers (name, license_number, phone, status) " +
                      "VALUES (?, ?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try(Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, driver.getName());
-            stmt.setString(2, driver.getLicenseNumber());
-            stmt.setString(3, driver.getPhone());
-            stmt.setString(4, driver.getStatus());
-            stmt.executeUpdate();
-            System.out.println("Driver added: " + driver.getName());
+            ps.setString(1, d.getName());
+            ps.setString(2, d.getLicNo());
+            ps.setString(3, d.getPhone());
+            ps.setString(4, d.getStatus());
+            ps.executeUpdate();
+            System.out.println("driver added: " + d.getName());
 
-        } catch (SQLException e) {
-            System.out.println("Error adding driver: " + e.getMessage());
+        } catch(SQLException e) {
+            System.out.println("addDriver failed: " + e.getMessage());
         }
     }
 
-    // Get all available drivers
     public List<Driver> getAvailableDrivers() {
-        List<Driver> drivers = new ArrayList<>();
+        List<Driver> list = new ArrayList<>();
         String sql = "SELECT * FROM drivers WHERE status = 'AVAILABLE'";
 
-        try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try(Connection conn = DBConnection.getConnection();
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql)) {
 
-            while (rs.next()) {
-                drivers.add(new Driver(
-                    rs.getInt("id"),
-                    rs.getString("name"),
-                    rs.getString("license_number"),
-                    rs.getString("phone"),
-                    rs.getString("status")
-                ));
-            }
-        } catch (SQLException e) {
-            System.out.println("Error fetching drivers: " + e.getMessage());
+            while(rs.next())
+                list.add(mapRow(rs));
+
+        } catch(SQLException e) {
+            System.out.println("getAvailableDrivers failed: " + e.getMessage());
         }
-        return drivers;
+        return list;
     }
 
-    // Get all drivers
     public List<Driver> getAllDrivers() {
-        List<Driver> drivers = new ArrayList<>();
+        List<Driver> list = new ArrayList<>();
         String sql = "SELECT * FROM drivers";
 
-        try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try(Connection conn = DBConnection.getConnection();
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql)) {
 
-            while (rs.next()) {
-                drivers.add(new Driver(
-                    rs.getInt("id"),
-                    rs.getString("name"),
-                    rs.getString("license_number"),
-                    rs.getString("phone"),
-                    rs.getString("status")
-                ));
-            }
-        } catch (SQLException e) {
-            System.out.println("Error fetching drivers: " + e.getMessage());
+            while(rs.next())
+                list.add(mapRow(rs));
+
+        } catch(SQLException e) {
+            System.out.println("getAllDrivers failed: " + e.getMessage());
         }
-        return drivers;
+        return list;
     }
 
-    // Update driver status
-    public void updateDriverStatus(int driverId, String status) {
+    public void updateStatus(int did, String status) {
         String sql = "UPDATE drivers SET status = ? WHERE id = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try(Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, status);
-            stmt.setInt(2, driverId);
-            stmt.executeUpdate();
-            System.out.println("Driver status updated to: " + status);
+            ps.setString(1, status);
+            ps.setInt(2, did);
+            ps.executeUpdate();
+            System.out.println("driver " + did + " status -> " + status);
 
-        } catch (SQLException e) {
-            System.out.println("Error updating driver: " + e.getMessage());
+        } catch(SQLException e) {
+            System.out.println("updateStatus failed: " + e.getMessage());
         }
     }
 
-    // Delete a driver
-    public void deleteDriver(int driverId) {
+    public void deleteDriver(int did) {
         String sql = "DELETE FROM drivers WHERE id = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try(Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, driverId);
-            stmt.executeUpdate();
-            System.out.println("Driver deleted successfully.");
+            ps.setInt(1, did);
+            ps.executeUpdate();
+            System.out.println("driver " + did + " deleted");
 
-        } catch (SQLException e) {
-            System.out.println("Error deleting driver: " + e.getMessage());
+        } catch(SQLException e) {
+            System.out.println("deleteDriver failed: " + e.getMessage());
         }
+    }
+
+    private Driver mapRow(ResultSet rs) throws SQLException {
+        return new Driver(
+            rs.getInt("id"),
+            rs.getString("name"),
+            rs.getString("license_number"),
+            rs.getString("phone"),
+            rs.getString("status")
+        );
     }
 }
