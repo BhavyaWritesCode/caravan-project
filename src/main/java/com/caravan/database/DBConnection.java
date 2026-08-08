@@ -8,9 +8,9 @@ import java.sql.SQLException;
 public class DBConnection {
 
     private static Dotenv dotenv = Dotenv.load();
-    private static final String URL = dotenv.get("DB_URL");
-    private static final String USER = dotenv.get("DB_USER");
-    private static final String PASSWORD = dotenv.get("DB_PASSWORD");
+    private static final String URL = dotenv.get("CARAVAN_DB_URL");
+    private static final String USER = dotenv.get("CARAVAN_DB_USER");
+    private static final String PASSWORD = dotenv.get("CARAVAN_DB_PASSWORD");
 
     private static Connection connection = null;
 

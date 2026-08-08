@@ -24,9 +24,7 @@ public class CostCalculator {
         return Math.max(distanceKm * rate, MINIMUM_FARE);
     }
 
-    public static double calculateTotalCost(double distanceKm, String vehicleType,
-                                            boolean hasAnimal, int priority,
-                                            boolean isNightTrip) {
+    public static double calculateTotalCost(double distanceKm, String vehicleType,boolean hasAnimal, int priority,boolean isNightTrip) {
         double cost = calculateBaseCost(distanceKm, vehicleType);
 
         if (hasAnimal)        cost *= ANIMAL_SURCHARGE;
